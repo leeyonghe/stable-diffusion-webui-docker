@@ -29,7 +29,14 @@ def api_only():
 
     initialize.initialize()
 
-    app = FastAPI()
+    app = FastAPI(
+        title="Stable Diffusion WebUI API",
+        description="API for Stable Diffusion WebUI",
+        version="1.0.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json"
+    )
     initialize_util.setup_middleware(app)
     api = create_api(app)
 
