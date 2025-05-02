@@ -40,7 +40,8 @@ RUN mkdir -p repositories && \
 RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors transformers && \
     cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
-    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
+    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt && \
+    pip${PYTHON_VERSION} install -e .
 
 # BLIP 모듈을 Python 경로에 추가
 ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:$PYTHONPATH
