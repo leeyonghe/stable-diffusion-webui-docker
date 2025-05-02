@@ -5,11 +5,11 @@ ARG BUILD_TYPE=prod
 
 FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-runtime-ubuntu22.04 AS base
 
-# Set environment variables
+# 환경 변수 설정
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# 시스템 의존성 설치
 RUN apt-get update && \
     apt-get install -y \
     git \
@@ -21,43 +21,43 @@ RUN apt-get update && \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# Clone the repository
+# 저장소 클론
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
 
 WORKDIR /app/stable-diffusion-webui
 
-# Clone Stable Diffusion repository
+# Stable Diffusion 저장소 클론
 RUN mkdir -p repositories && \
     cd repositories && \
     git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai
 
-# Create necessary directories
+# 필요한 디렉토리 생성
 RUN mkdir -p models/Stable-diffusion && \
     mkdir -p models/VAE && \
     mkdir -p embeddings && \
     mkdir -p outputs && \
     mkdir -p extensions
 
-# Download a base model (you might want to change this to your preferred model)
+# 기본 모델 다운로드 (원하는 모델로 변경 가능)
 RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors -O models/Stable-diffusion/v1-5-pruned.safetensors
 
-# Install Python dependencies
+# Python 의존성 설치
 RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt && \
     pip${PYTHON_VERSION} install --no-cache-dir ftfy regex tqdm && \
     pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git && \
     pip${PYTHON_VERSION} install --no-cache-dir sgm && \
     pip${PYTHON_VERSION} install --no-cache-dir fastapi uvicorn python-multipart
 
-# Expose the port
+# 포트 노출
 EXPOSE 7860
 
-# Start the web UI
+# 웹 UI 시작
 CMD ["python3", "webui.py", "--listen", "--port", "7860"]
 
-# Development stage
+# 개발 환경 스테이지
 FROM base AS dev
 
 RUN apt-get update && apt-get install -y \
