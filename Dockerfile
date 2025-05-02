@@ -40,10 +40,10 @@ RUN mkdir -p repositories && \
 RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors transformers && \
     cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
-    pip${PYTHON_VERSION} install git+https://github.com/salesforce/BLIP.git
+    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
 
-# Note: SGM package installation is skipped as it requires authentication
-# Please install it manually after building the container
+# BLIP 모듈을 Python 경로에 추가
+ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:$PYTHONPATH
 
 # 필요한 디렉토리 생성
 RUN mkdir -p models/Stable-diffusion && \
