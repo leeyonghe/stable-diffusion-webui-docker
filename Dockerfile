@@ -19,7 +19,12 @@ RUN apt-get update && \
     python3-pip \
     libgl1 \
     libglib2.0-0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Rust 설치
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # pip 및 setuptools 업그레이드
 RUN pip${PYTHON_VERSION} install --upgrade pip setuptools wheel
@@ -41,7 +46,8 @@ RUN mkdir -p repositories && \
 
 # Install required dependencies
 RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors transformers && \
+    pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors && \
+    pip${PYTHON_VERSION} install --no-cache-dir transformers && \
     cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
     cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
 
