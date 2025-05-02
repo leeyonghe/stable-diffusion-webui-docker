@@ -34,8 +34,17 @@ RUN mkdir -p repositories && \
     cd repositories && \
     git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai
 
-# Install sgm package
-RUN pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/Stability-AI/sgm.git@main#egg=sgm --config-settings git.credentials.helper=store
+# Install sgm package dependencies first
+RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors transformers
+
+# Clone and install sgm package
+RUN mkdir -p /tmp/sgm && \
+    cd /tmp/sgm && \
+    wget https://github.com/Stability-AI/sgm/archive/refs/tags/v1.0.0.tar.gz && \
+    tar xzf v1.0.0.tar.gz && \
+    cd sgm-1.0.0 && \
+    pip${PYTHON_VERSION} install -e .
 
 # 필요한 디렉토리 생성
 RUN mkdir -p models/Stable-diffusion && \
