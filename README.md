@@ -160,6 +160,50 @@ git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui
 ### Apple Silicon에서 설치
 [여기](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon)에서 지침을 찾을 수 있습니다.
 
+## Docker Compose를 사용한 설치 및 실행
+
+Docker Compose를 사용하면 Stable Diffusion Web UI를 쉽게 설치하고 실행할 수 있습니다.
+
+### 사전 요구사항
+- Docker 및 Docker Compose가 설치되어 있어야 합니다.
+- NVIDIA GPU가 필요하며 NVIDIA Container Toolkit이 설치되어 있어야 합니다.
+
+### 설치 및 실행 방법
+
+1. 저장소를 클론합니다:
+```bash
+git clone https://github.com/leeyonghe/stable-diffusion-webui-docker.git
+cd stable-diffusion-webui-docker
+```
+
+2. Docker Compose를 사용하여 컨테이너를 빌드하고 실행합니다:
+```bash
+docker-compose up -d
+```
+
+3. 웹 브라우저에서 다음 URL로 접속합니다:
+```
+http://localhost:7860
+```
+
+### 볼륨 마운트
+다음 디렉토리가 호스트 시스템에 마운트됩니다:
+- `./models`: 모델 파일 저장
+- `./outputs`: 생성된 이미지 저장
+- `./extensions`: 확장 기능 저장
+
+### 환경 변수
+- `PYTHONUNBUFFERED=1`: Python 출력 버퍼링 비활성화
+- `NVIDIA_VISIBLE_DEVICES=all`: 모든 NVIDIA GPU 사용
+
+### 자동 재시작
+컨테이너는 `unless-stopped` 정책으로 설정되어 있어, 명시적으로 중지하지 않는 한 자동으로 재시작됩니다.
+
+### 중지 방법
+```bash
+docker-compose down
+```
+
 ## 기여
 이 저장소에 코드를 추가하는 방법: [기여](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Contributing)
 
