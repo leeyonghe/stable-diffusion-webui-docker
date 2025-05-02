@@ -35,7 +35,7 @@ RUN mkdir -p repositories && \
     git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai
 
 # Install sgm package
-RUN pip${PYTHON_VERSION} install --no-cache-dir sgm
+RUN pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/Stability-AI/sgm.git
 
 # 필요한 디렉토리 생성
 RUN mkdir -p models/Stable-diffusion && \
