@@ -47,7 +47,8 @@ RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v
 # Install Python dependencies
 RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt && \
     pip${PYTHON_VERSION} install --no-cache-dir ftfy regex tqdm && \
-    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git
+    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git && \
+    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/Stability-AI/sgm.git
 
 # Expose the port
 EXPOSE 7860
