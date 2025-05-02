@@ -32,7 +32,7 @@ WORKDIR /app/stable-diffusion-webui
 # Clone Stable Diffusion repository
 RUN mkdir -p repositories && \
     cd repositories && \
-    git clone https://github.com/Stability-AI/stablediffusion.git stable-diffusion-stability-ai
+    git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai
 
 # Create necessary directories
 RUN mkdir -p models/Stable-diffusion && \
