@@ -171,16 +171,18 @@ For the purposes of getting Google and other search engines to crawl the wiki, h
 
 ## API Documentation
 
-The API documentation is available through Swagger UI and ReDoc:
+The API documentation is available through Swagger UI and ReDoc. If you're running the web UI locally, you can access the documentation at:
 
-- Swagger UI: `/docs`
-- ReDoc: `/redoc`
-- OpenAPI Specification: `/openapi.json`
+- Swagger UI: `http://localhost:7860/docs`
+- ReDoc: `http://localhost:7860/redoc`
+- OpenAPI Specification: `http://localhost:7860/openapi.json`
 
 These endpoints provide interactive documentation for all available API endpoints, including:
 - Stable Diffusion API
 - Lora Networks API
 - Callbacks API
+
+Note: If you're running the web UI on a different host or port, replace `localhost:7860` with your actual host and port.
 
 ## Credits
 Licenses for borrowed code can be found in `Settings -> Licenses` screen, and also in `html/licenses.html` file.
