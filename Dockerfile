@@ -34,6 +34,12 @@ RUN mkdir -p repositories && \
     cd repositories && \
     git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai
 
+# Clone sgm repository
+RUN mkdir -p repositories/sgm && \
+    cd repositories/sgm && \
+    git clone https://github.com/Stability-AI/sgm.git . && \
+    pip${PYTHON_VERSION} install -e .
+
 # 필요한 디렉토리 생성
 RUN mkdir -p models/Stable-diffusion && \
     mkdir -p models/VAE && \
@@ -48,7 +54,6 @@ RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v
 RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt && \
     pip${PYTHON_VERSION} install --no-cache-dir ftfy regex tqdm && \
     pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git && \
-    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/Stability-AI/sgm.git@main --no-deps && \
     pip${PYTHON_VERSION} install --no-cache-dir fastapi uvicorn python-multipart
 
 # 포트 노출
