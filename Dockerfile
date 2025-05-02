@@ -34,15 +34,13 @@ RUN mkdir -p repositories && \
     cd repositories && \
     git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai && \
     git clone https://github.com/Stability-AI/generative-models.git sgm && \
-    git clone https://github.com/salesforce/BLIP.git && \
-    git clone https://github.com/crowsonkb/k-diffusion.git
+    git clone https://github.com/salesforce/BLIP.git
 
 # Install required dependencies
 RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors transformers && \
     cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
-    cd ../BLIP && pip${PYTHON_VERSION} install -e . && \
-    cd ../k-diffusion && pip${PYTHON_VERSION} install -e .
+    pip${PYTHON_VERSION} install git+https://github.com/salesforce/BLIP.git
 
 # Note: SGM package installation is skipped as it requires authentication
 # Please install it manually after building the container
