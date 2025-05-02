@@ -3,18 +3,20 @@ ARG CUDA_VERSION=11.8.0
 ARG CUDNN_VERSION=8
 ARG BUILD_TYPE=prod
 
-FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-runtime-ubuntu22.04 as base
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-runtime-ubuntu22.04 AS base
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
     git \
     wget \
-    python${PYTHON_VERSION} \
-    python${PYTHON_VERSION}-pip \
+    python3 \
+    python3-venv \
+    python3-pip \
     libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
@@ -40,7 +42,8 @@ EXPOSE 7860
 CMD ["python3", "webui.py", "--listen", "--port", "7860"]
 
 # Development stage
-FROM base as dev
+FROM base AS dev
+
 RUN apt-get update && apt-get install -y \
     vim \
     curl \
