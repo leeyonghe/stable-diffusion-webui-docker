@@ -37,7 +37,7 @@ RUN mkdir -p repositories && \
 # Clone sgm repository
 RUN mkdir -p repositories/sgm && \
     cd repositories/sgm && \
-    wget https://github.com/Stability-AI/sgm/archive/refs/heads/main.zip && \
+    wget https://codeload.github.com/Stability-AI/sgm/zip/refs/heads/main -O main.zip && \
     unzip main.zip && \
     mv sgm-main/* . && \
     rm -rf sgm-main main.zip && \
