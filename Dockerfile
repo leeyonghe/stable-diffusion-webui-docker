@@ -37,7 +37,7 @@ RUN mkdir -p repositories && \
 # Clone sgm repository
 RUN mkdir -p repositories/sgm && \
     cd repositories/sgm && \
-    git clone https://github.com/Stability-AI/sgm.git . && \
+    git clone --depth 1 --branch main https://github.com/Stability-AI/sgm.git . && \
     pip${PYTHON_VERSION} install -e .
 
 # 필요한 디렉토리 생성
