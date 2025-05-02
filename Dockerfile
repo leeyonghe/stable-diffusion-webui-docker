@@ -48,7 +48,7 @@ RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v
 RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt && \
     pip${PYTHON_VERSION} install --no-cache-dir ftfy regex tqdm && \
     pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git && \
-    pip${PYTHON_VERSION} install --no-cache-dir sgm && \
+    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/Stability-AI/sgm.git@main && \
     pip${PYTHON_VERSION} install --no-cache-dir fastapi uvicorn python-multipart
 
 # 포트 노출
