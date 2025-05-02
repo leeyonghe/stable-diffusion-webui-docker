@@ -29,6 +29,11 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # pip 및 setuptools 업그레이드
 RUN pip${PYTHON_VERSION} install --upgrade pip setuptools wheel
 
+# pip 설정 (재시도 및 타임아웃 설정)
+RUN pip${PYTHON_VERSION} config set global.timeout 600 && \
+    pip${PYTHON_VERSION} config set global.retries 10 && \
+    pip${PYTHON_VERSION} config set global.trusted-host "download.pytorch.org"
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
@@ -45,9 +50,9 @@ RUN mkdir -p repositories && \
     git clone https://github.com/salesforce/BLIP.git
 
 # Install required dependencies
-RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors && \
-    pip${PYTHON_VERSION} install --no-cache-dir transformers && \
+RUN pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 einops k-diffusion safetensors && \
+    pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 transformers && \
     cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
     cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
 
