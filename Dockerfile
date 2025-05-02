@@ -21,6 +21,9 @@ RUN apt-get update && \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
+# pip 및 setuptools 업그레이드
+RUN pip${PYTHON_VERSION} install --upgrade pip setuptools wheel
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
@@ -40,8 +43,7 @@ RUN mkdir -p repositories && \
 RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
     pip${PYTHON_VERSION} install --no-cache-dir einops k-diffusion safetensors transformers && \
     cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
-    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt && \
-    pip${PYTHON_VERSION} install -e .
+    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
 
 # BLIP 모듈을 Python 경로에 추가
 ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:$PYTHONPATH
