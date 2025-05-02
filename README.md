@@ -1,4 +1,6 @@
 # Stable Diffusion Web UI / Stable Diffusion 웹 UI
+[![Development Status](https://img.shields.io/badge/status-development-yellow.svg)](https://github.com/leeyonghe/stable-diffusion-webui-docker)
+
 A web interface for Stable Diffusion, implemented using Gradio library. / Gradio 라이브러리를 사용하여 구현된 Stable Diffusion의 웹 인터페이스입니다.
 
 ![](screenshot.png)
