@@ -41,9 +41,9 @@ RUN pip${PYTHON_VERSION} install --no-cache-dir torch torchvision torchaudio --i
 # Clone and install sgm package
 RUN mkdir -p /tmp/sgm && \
     cd /tmp/sgm && \
-    wget https://github.com/Stability-AI/sgm/archive/refs/heads/main.zip && \
-    unzip main.zip && \
-    cd sgm-main && \
+    wget https://raw.githubusercontent.com/Stability-AI/sgm/main/setup.py && \
+    wget https://raw.githubusercontent.com/Stability-AI/sgm/main/requirements.txt && \
+    pip${PYTHON_VERSION} install -r requirements.txt && \
     pip${PYTHON_VERSION} install -e .
 
 # 필요한 디렉토리 생성
