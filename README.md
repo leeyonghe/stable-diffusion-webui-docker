@@ -1,134 +1,134 @@
-# Stable Diffusion web UI
-A web interface for Stable Diffusion, implemented using Gradio library.
+# Stable Diffusion 웹 UI
+Gradio 라이브러리를 사용하여 구현된 Stable Diffusion의 웹 인터페이스입니다.
 
 ![](screenshot.png)
 
-## Features
-[Detailed feature showcase with images](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features):
-- Original txt2img and img2img modes
-- One click install and run script (but you still must install python and git)
-- Outpainting
-- Inpainting
-- Color Sketch
-- Prompt Matrix
-- Stable Diffusion Upscale
-- Attention, specify parts of text that the model should pay more attention to
-    - a man in a `((tuxedo))` - will pay more attention to tuxedo
-    - a man in a `(tuxedo:1.21)` - alternative syntax
-    - select text and press `Ctrl+Up` or `Ctrl+Down` (or `Command+Up` or `Command+Down` if you're on a MacOS) to automatically adjust attention to selected text (code contributed by anonymous user)
-- Loopback, run img2img processing multiple times
-- X/Y/Z plot, a way to draw a 3 dimensional plot of images with different parameters
-- Textual Inversion
-    - have as many embeddings as you want and use any names you like for them
-    - use multiple embeddings with different numbers of vectors per token
-    - works with half precision floating point numbers
-    - train embeddings on 8GB (also reports of 6GB working)
-- Extras tab with:
-    - GFPGAN, neural network that fixes faces
-    - CodeFormer, face restoration tool as an alternative to GFPGAN
-    - RealESRGAN, neural network upscaler
-    - ESRGAN, neural network upscaler with a lot of third party models
-    - SwinIR and Swin2SR ([see here](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/2092)), neural network upscalers
-    - LDSR, Latent diffusion super resolution upscaling
-- Resizing aspect ratio options
-- Sampling method selection
-    - Adjust sampler eta values (noise multiplier)
-    - More advanced noise setting options
-- Interrupt processing at any time
-- 4GB video card support (also reports of 2GB working)
-- Correct seeds for batches
-- Live prompt token length validation
-- Generation parameters
-     - parameters you used to generate images are saved with that image
-     - in PNG chunks for PNG, in EXIF for JPEG
-     - can drag the image to PNG info tab to restore generation parameters and automatically copy them into UI
-     - can be disabled in settings
-     - drag and drop an image/text-parameters to promptbox
-- Read Generation Parameters Button, loads parameters in promptbox to UI
-- Settings page
-- Running arbitrary python code from UI (must run with `--allow-code` to enable)
-- Mouseover hints for most UI elements
-- Possible to change defaults/mix/max/step values for UI elements via text config
-- Tiling support, a checkbox to create images that can be tiled like textures
-- Progress bar and live image generation preview
-    - Can use a separate neural network to produce previews with almost none VRAM or compute requirement
-- Negative prompt, an extra text field that allows you to list what you don't want to see in generated image
-- Styles, a way to save part of prompt and easily apply them via dropdown later
-- Variations, a way to generate same image but with tiny differences
-- Seed resizing, a way to generate same image but at slightly different resolution
-- CLIP interrogator, a button that tries to guess prompt from an image
-- Prompt Editing, a way to change prompt mid-generation, say to start making a watermelon and switch to anime girl midway
-- Batch Processing, process a group of files using img2img
-- Img2img Alternative, reverse Euler method of cross attention control
-- Highres Fix, a convenience option to produce high resolution pictures in one click without usual distortions
-- Reloading checkpoints on the fly
-- Checkpoint Merger, a tab that allows you to merge up to 3 checkpoints into one
-- [Custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Custom-Scripts) with many extensions from community
-- [Composable-Diffusion](https://energy-based-model.github.io/Compositional-Visual-Generation-with-Composable-Diffusion-Models/), a way to use multiple prompts at once
-     - separate prompts using uppercase `AND`
-     - also supports weights for prompts: `a cat :1.2 AND a dog AND a penguin :2.2`
-- No token limit for prompts (original stable diffusion lets you use up to 75 tokens)
-- DeepDanbooru integration, creates danbooru style tags for anime prompts
-- [xformers](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Xformers), major speed increase for select cards: (add `--xformers` to commandline args)
-- via extension: [History tab](https://github.com/yfszzx/stable-diffusion-webui-images-browser): view, direct and delete images conveniently within the UI
-- Generate forever option
-- Training tab
-     - hypernetworks and embeddings options
-     - Preprocessing images: cropping, mirroring, autotagging using BLIP or deepdanbooru (for anime)
-- Clip skip
-- Hypernetworks
-- Loras (same as Hypernetworks but more pretty)
-- A separate UI where you can choose, with preview, which embeddings, hypernetworks or Loras to add to your prompt
-- Can select to load a different VAE from settings screen
-- Estimated completion time in progress bar
+## 기능
+[이미지와 함께 자세한 기능 소개](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features):
+- 원본 txt2img 및 img2img 모드
+- 한 번의 클릭으로 설치 및 실행 스크립트 (단, Python과 git은 별도로 설치 필요)
+- 아웃페인팅
+- 인페인팅
+- 컬러 스케치
+- 프롬프트 매트릭스
+- Stable Diffusion 업스케일
+- 주의력 조절, 모델이 더 주의를 기울여야 하는 텍스트 부분 지정
+    - `((정장))`을 입은 남자 - 정장에 더 주의를 기울임
+    - `(정장:1.21)`을 입은 남자 - 대체 구문
+    - 텍스트를 선택하고 `Ctrl+Up` 또는 `Ctrl+Down` (MacOS에서는 `Command+Up` 또는 `Command+Down`)을 눌러 선택한 텍스트의 주의력을 자동으로 조정 (익명 사용자가 기여한 코드)
+- 루프백, img2img 처리를 여러 번 실행
+- X/Y/Z 플롯, 다양한 매개변수로 3차원 이미지 플롯을 그리는 방법
+- 텍스트 인버전
+    - 원하는 만큼 임베딩을 가질 수 있고 원하는 이름을 사용할 수 있음
+    - 토큰당 다른 수의 벡터를 가진 여러 임베딩을 사용할 수 있음
+    - 반정밀도 부동 소수점 숫자로 작동
+    - 8GB에서 임베딩 학습 (6GB에서도 작동하는 보고 있음)
+- 추가 기능 탭:
+    - GFPGAN, 얼굴을 수정하는 신경망
+    - CodeFormer, GFPGAN의 대안으로 사용할 수 있는 얼굴 복원 도구
+    - RealESRGAN, 신경망 업스케일러
+    - ESRGAN, 많은 타사 모델이 있는 신경망 업스케일러
+    - SwinIR 및 Swin2SR ([여기 참조](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/2092)), 신경망 업스케일러
+    - LDSR, 잠재적 확산 초해상도 업스케일링
+- 종횡비 조정 옵션
+- 샘플링 방법 선택
+    - 샘플러 eta 값 조정 (노이즈 승수)
+    - 더 고급 노이즈 설정 옵션
+- 언제든지 처리 중단 가능
+- 4GB 비디오 카드 지원 (2GB에서도 작동하는 보고 있음)
+- 배치에 대한 올바른 시드
+- 실시간 프롬프트 토큰 길이 검증
+- 생성 매개변수
+     - 이미지 생성에 사용한 매개변수가 해당 이미지와 함께 저장됨
+     - PNG는 PNG 청크에, JPEG는 EXIF에 저장
+     - 이미지를 PNG 정보 탭으로 드래그하여 생성 매개변수를 복원하고 자동으로 UI에 복사 가능
+     - 설정에서 비활성화 가능
+     - 이미지/텍스트 매개변수를 프롬프트 상자로 드래그 앤 드롭
+- 생성 매개변수 읽기 버튼, 프롬프트 상자의 매개변수를 UI에 로드
+- 설정 페이지
+- UI에서 임의의 Python 코드 실행 (`--allow-code`로 실행해야 활성화)
+- 대부분의 UI 요소에 마우스 오버 힌트
+- 텍스트 설정을 통해 UI 요소의 기본값/최소값/최대값/단계 값을 변경 가능
+- 타일링 지원, 텍스처처럼 타일링할 수 있는 이미지를 생성하는 체크박스
+- 진행 막대 및 실시간 이미지 생성 미리보기
+    - 거의 VRAM이나 컴퓨팅 요구사항 없이 미리보기를 생성하기 위해 별도의 신경망 사용 가능
+- 네거티브 프롬프트, 생성된 이미지에서 보지 않기를 원하는 것을 나열할 수 있는 추가 텍스트 필드
+- 스타일, 프롬프트의 일부를 저장하고 나중에 드롭다운을 통해 쉽게 적용하는 방법
+- 변형, 같은 이미지를 약간의 차이로 생성하는 방법
+- 시드 크기 조정, 약간 다른 해상도로 같은 이미지를 생성하는 방법
+- CLIP 인터로게이터, 이미지에서 프롬프트를 추측하려고 시도하는 버튼
+- 프롬프트 편집, 생성 중간에 프롬프트를 변경하는 방법 (예: 수박을 만들다가 중간에 애니메이션 소녀로 전환)
+- 배치 처리, img2img를 사용하여 파일 그룹 처리
+- Img2img 대안, 교차 주의 제어의 역 오일러 방법
+- 고해상도 수정, 일반적인 왜곡 없이 한 번의 클릭으로 고해상도 사진을 생성하는 편리한 옵션
+- 체크포인트 즉시 다시 로드
+- 체크포인트 병합기, 최대 3개의 체크포인트를 하나로 병합할 수 있는 탭
+- 커뮤니티의 많은 확장 기능이 있는 [사용자 정의 스크립트](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Custom-Scripts)
+- [Composable-Diffusion](https://energy-based-model.github.io/Compositional-Visual-Generation-with-Composable-Diffusion-Models/), 여러 프롬프트를 한 번에 사용하는 방법
+     - 대문자 `AND`를 사용하여 프롬프트 분리
+     - 프롬프트에 대한 가중치도 지원: `고양이 :1.2 AND 개 AND 펭귄 :2.2`
+- 프롬프트에 대한 토큰 제한 없음 (원본 stable diffusion은 최대 75개의 토큰 사용 가능)
+- DeepDanbooru 통합, 애니메이션 프롬프트를 위한 danbooru 스타일 태그 생성
+- [xformers](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Xformers), 선택한 카드에 대한 주요 속도 증가: (명령줄 인수에 `--xformers` 추가)
+- 확장 기능을 통한 [히스토리 탭](https://github.com/yfszzx/stable-diffusion-webui-images-browser): UI 내에서 이미지를 편리하게 보고, 직접하고, 삭제
+- 영원히 생성 옵션
+- 학습 탭
+     - 하이퍼네트워크 및 임베딩 옵션
+     - 이미지 전처리: 자르기, 미러링, BLIP 또는 deepdanbooru를 사용한 자동 태깅 (애니메이션용)
+- 클립 스킵
+- 하이퍼네트워크
+- Loras (하이퍼네트워크와 비슷하지만 더 예쁨)
+- 미리보기와 함께 임베딩, 하이퍼네트워크 또는 Loras를 선택하여 프롬프트에 추가할 수 있는 별도의 UI
+- 설정 화면에서 다른 VAE를 선택하여 로드 가능
+- 진행 막대에 예상 완료 시간
 - API
-- Support for dedicated [inpainting model](https://github.com/runwayml/stable-diffusion#inpainting-with-stable-diffusion) by RunwayML
-- via extension: [Aesthetic Gradients](https://github.com/AUTOMATIC1111/stable-diffusion-webui-aesthetic-gradients), a way to generate images with a specific aesthetic by using clip images embeds (implementation of [https://github.com/vicgalle/stable-diffusion-aesthetic-gradients](https://github.com/vicgalle/stable-diffusion-aesthetic-gradients))
-- [Stable Diffusion 2.0](https://github.com/Stability-AI/stablediffusion) support - see [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#stable-diffusion-20) for instructions
-- [Alt-Diffusion](https://arxiv.org/abs/2211.06679) support - see [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#alt-diffusion) for instructions
-- Now without any bad letters!
-- Load checkpoints in safetensors format
-- Eased resolution restriction: generated image's dimensions must be a multiple of 8 rather than 64
-- Now with a license!
-- Reorder elements in the UI from settings screen
-- [Segmind Stable Diffusion](https://huggingface.co/segmind/SSD-1B) support
+- RunwayML의 전용 [인페인팅 모델](https://github.com/runwayml/stable-diffusion#inpainting-with-stable-diffusion) 지원
+- 확장 기능을 통한 [Aesthetic Gradients](https://github.com/AUTOMATIC1111/stable-diffusion-webui-aesthetic-gradients), clip 이미지 임베딩을 사용하여 특정 미학으로 이미지를 생성하는 방법 ([https://github.com/vicgalle/stable-diffusion-aesthetic-gradients](https://github.com/vicgalle/stable-diffusion-aesthetic-gradients) 구현)
+- [Stable Diffusion 2.0](https://github.com/Stability-AI/stablediffusion) 지원 - [위키](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#stable-diffusion-20)에서 지침 참조
+- [Alt-Diffusion](https://arxiv.org/abs/2211.06679) 지원 - [위키](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#alt-diffusion)에서 지침 참조
+- 이제 나쁜 글자가 없음!
+- safetensors 형식으로 체크포인트 로드
+- 해상도 제한 완화: 생성된 이미지의 크기는 64가 아닌 8의 배수여야 함
+- 이제 라이선스가 있음!
+- 설정 화면에서 UI 요소 순서 변경
+- [Segmind Stable Diffusion](https://huggingface.co/segmind/SSD-1B) 지원
 
-## Installation and Running
-Make sure the required [dependencies](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies) are met and follow the instructions available for:
-- [NVidia](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) (recommended)
-- [AMD](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-AMD-GPUs) GPUs.
-- [Intel CPUs, Intel GPUs (both integrated and discrete)](https://github.com/openvinotoolkit/stable-diffusion-webui/wiki/Installation-on-Intel-Silicon) (external wiki page)
-- [Ascend NPUs](https://github.com/wangshuai09/stable-diffusion-webui/wiki/Install-and-run-on-Ascend-NPUs) (external wiki page)
+## 설치 및 실행
+필요한 [의존성](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies)이 충족되었는지 확인하고 다음 지침을 따르세요:
+- [NVidia](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) (권장)
+- [AMD](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-AMD-GPUs) GPU
+- [Intel CPU, Intel GPU (통합 및 개별)](https://github.com/openvinotoolkit/stable-diffusion-webui/wiki/Installation-on-Intel-Silicon) (외부 위키 페이지)
+- [Ascend NPU](https://github.com/wangshuai09/stable-diffusion-webui/wiki/Install-and-run-on-Ascend-NPUs) (외부 위키 페이지)
 
-Alternatively, use online services (like Google Colab):
+또는 온라인 서비스 사용 (Google Colab 등):
 
-- [List of Online Services](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Online-Services)
+- [온라인 서비스 목록](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Online-Services)
 
-### Installation on Windows 10/11 with NVidia-GPUs using release package
-1. Download `sd.webui.zip` from [v1.0.0-pre](https://github.com/AUTOMATIC1111/stable-diffusion-webui/releases/tag/v1.0.0-pre) and extract its contents.
-2. Run `update.bat`.
-3. Run `run.bat`.
-> For more details see [Install-and-Run-on-NVidia-GPUs](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs)
+### NVidia-GPU를 사용하는 Windows 10/11에서 릴리스 패키지로 설치
+1. [v1.0.0-pre](https://github.com/AUTOMATIC1111/stable-diffusion-webui/releases/tag/v1.0.0-pre)에서 `sd.webui.zip`을 다운로드하고 내용을 추출합니다.
+2. `update.bat`를 실행합니다.
+3. `run.bat`를 실행합니다.
+> 자세한 내용은 [Install-and-Run-on-NVidia-GPUs](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) 참조
 
-### Automatic Installation on Windows
-1. Install [Python 3.10.6](https://www.python.org/downloads/release/python-3106/) (Newer version of Python does not support torch), checking "Add Python to PATH".
-2. Install [git](https://git-scm.com/download/win).
-3. Download the stable-diffusion-webui repository, for example by running `git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git`.
-4. Run `webui-user.bat` from Windows Explorer as normal, non-administrator, user.
+### Windows에서 자동 설치
+1. [Python 3.10.6](https://www.python.org/downloads/release/python-3106/)을 설치하고 "Add Python to PATH"를 체크합니다.
+2. [git](https://git-scm.com/download/win)을 설치합니다.
+3. stable-diffusion-webui 저장소를 다운로드합니다. 예를 들어 `git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git`을 실행합니다.
+4. Windows 탐색기에서 일반 사용자로 `webui-user.bat`를 실행합니다.
 
-### Automatic Installation on Linux
-1. Install the dependencies:
+### Linux에서 자동 설치
+1. 의존성을 설치합니다:
 ```bash
-# Debian-based:
+# Debian 기반:
 sudo apt install wget git python3 python3-venv libgl1 libglib2.0-0
-# Red Hat-based:
+# Red Hat 기반:
 sudo dnf install wget git python3 gperftools-libs libglvnd-glx
-# openSUSE-based:
+# openSUSE 기반:
 sudo zypper install wget git python3 libtcmalloc4 libglvnd
-# Arch-based:
+# Arch 기반:
 sudo pacman -S wget git python3
 ```
-If your system is very new, you need to install python3.11 or python3.10:
+시스템이 매우 새로운 경우 python3.11 또는 python3.10을 설치해야 합니다:
 ```bash
 # Ubuntu 24.04
 sudo add-apt-repository ppa:deadsnakes/ppa
@@ -137,54 +137,52 @@ sudo apt install python3.11
 
 # Manjaro/Arch
 sudo pacman -S yay
-yay -S python311 # do not confuse with python3.11 package
+yay -S python311 # python3.11 패키지와 혼동하지 마세요
 
-# Only for 3.11
-# Then set up env variable in launch script
+# 3.11만 해당
+# 그런 다음 시작 스크립트에서 환경 변수 설정
 export python_cmd="python3.11"
-# or in webui-user.sh
+# 또는 webui-user.sh에서
 python_cmd="python3.11"
 ```
-2. Navigate to the directory you would like the webui to be installed and execute the following command:
+2. webui를 설치할 디렉토리로 이동하고 다음 명령을 실행합니다:
 ```bash
 wget -q https://raw.githubusercontent.com/AUTOMATIC1111/stable-diffusion-webui/master/webui.sh
 ```
-Or just clone the repo wherever you want:
+또는 원하는 위치에 저장소를 클론합니다:
 ```bash
 git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui
 ```
 
-3. Run `webui.sh`.
-4. Check `webui-user.sh` for options.
-### Installation on Apple Silicon
+3. `webui.sh`를 실행합니다.
+4. 옵션을 확인하려면 `webui-user.sh`를 확인하세요.
 
-Find the instructions [here](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon).
+### Apple Silicon에서 설치
+[여기](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon)에서 지침을 찾을 수 있습니다.
 
-## Contributing
-Here's how to add code to this repo: [Contributing](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Contributing)
+## 기여
+이 저장소에 코드를 추가하는 방법: [기여](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Contributing)
 
-## Documentation
+## 문서화
+문서는 이 README에서 프로젝트의 [위키](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki)로 이동했습니다.
 
-The documentation was moved from this README over to the project's [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki).
+Google 및 기타 검색 엔진이 위키를 크롤링할 수 있도록 (사람용이 아님) [크롤링 가능한 위키](https://github-wiki-see.page/m/AUTOMATIC1111/stable-diffusion-webui/wiki) 링크가 있습니다.
 
-For the purposes of getting Google and other search engines to crawl the wiki, here's a link to the (not for humans) [crawlable wiki](https://github-wiki-see.page/m/AUTOMATIC1111/stable-diffusion-webui/wiki).
-
-## API Documentation
-
-The API documentation is available through Swagger UI and ReDoc. If you're running the web UI locally, you can access the documentation at:
+## API 문서화
+API 문서는 Swagger UI와 ReDoc를 통해 이용할 수 있습니다. 웹 UI를 로컬에서 실행 중인 경우 다음 URL에서 문서에 접근할 수 있습니다:
 
 - Swagger UI: `http://localhost:7860/docs`
 - ReDoc: `http://localhost:7860/redoc`
-- OpenAPI Specification: `http://localhost:7860/openapi.json`
+- OpenAPI 사양: `http://localhost:7860/openapi.json`
 
-These endpoints provide interactive documentation for all available API endpoints, including:
+이러한 엔드포인트는 다음을 포함한 모든 사용 가능한 API 엔드포인트에 대한 대화형 문서를 제공합니다:
 - Stable Diffusion API
 - Lora Networks API
 - Callbacks API
 
-Note: If you're running the web UI on a different host or port, replace `localhost:7860` with your actual host and port.
+참고: 웹 UI가 다른 호스트나 포트에서 실행 중인 경우 `localhost:7860`을 실제 호스트와 포트로 교체하세요.
 
-## Credits
-Licenses for borrowed code can be found in `Settings -> Licenses` screen, and also in `html/licenses.html` file.
+## 크레딧
+차용한 코드의 라이선스는 `Settings -> Licenses` 화면과 `html/licenses.html` 파일에서 찾을 수 있습니다.
 
 - Stable Diffusion - https://github.com/Stability-AI/stablediffusion, https://github.com/CompVis/taming-transformers, https://github.com/mcmonkey4eva/sd3-ref
