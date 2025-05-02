@@ -29,11 +29,23 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
 
 WORKDIR /app/stable-diffusion-webui
 
-# Install Python dependencies
-RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt
+# Clone Stable Diffusion repository
+RUN mkdir -p repositories && \
+    cd repositories && \
+    git clone https://github.com/Stability-AI/stablediffusion.git stable-diffusion-stability-ai
 
 # Create necessary directories
-RUN mkdir -p models outputs extensions
+RUN mkdir -p models/Stable-diffusion && \
+    mkdir -p models/VAE && \
+    mkdir -p embeddings && \
+    mkdir -p outputs && \
+    mkdir -p extensions
+
+# Download a base model (you might want to change this to your preferred model)
+RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors -O models/Stable-diffusion/v1-5-pruned.safetensors
+
+# Install Python dependencies
+RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt
 
 # Expose the port
 EXPOSE 7860
