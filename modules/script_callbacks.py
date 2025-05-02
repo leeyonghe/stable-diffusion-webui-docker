@@ -3,13 +3,25 @@ from __future__ import annotations
 import dataclasses
 import inspect
 import os
-from typing import Optional, Any
+from typing import Optional, Any, List, Dict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from gradio import Blocks
 
 from modules import errors, timer, extensions, shared, util
 
+# Create a router for API endpoints
+api_router = APIRouter()
+
+@api_router.get("/callbacks", response_model=Dict[str, List[str]])
+async def get_callbacks():
+    """Get all registered callbacks"""
+    return {category: [cb.name for cb in callbacks] for category, callbacks in callback_map.items()}
+
+@api_router.get("/callbacks/{category}", response_model=List[str])
+async def get_category_callbacks(category: str):
+    """Get callbacks for a specific category"""
+    return [cb.name for cb in callback_map.get(f'callbacks_{category}', [])]
 
 def report_exception(c, job):
     errors.report(f"Error executing callback {job} for {c.script}", exc_info=True)

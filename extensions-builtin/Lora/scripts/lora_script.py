@@ -1,7 +1,9 @@
 import re
+from typing import List, Dict, Any
 
 import gradio as gr
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
+from pydantic import BaseModel
 
 import network
 import networks
@@ -11,6 +13,24 @@ import extra_networks_lora
 import ui_extra_networks_lora
 from modules import script_callbacks, ui_extra_networks, extra_networks, shared
 
+# Create a router for Lora API endpoints
+lora_router = APIRouter()
+
+class LoraNetwork(BaseModel):
+    name: str
+    alias: str
+    path: str
+    metadata: Dict[str, Any]
+
+@lora_router.get("/loras", response_model=List[LoraNetwork])
+async def get_loras():
+    """Get all available Lora networks"""
+    return [create_lora_json(obj) for obj in networks.available_networks.values()]
+
+@lora_router.post("/refresh-loras")
+async def refresh_loras():
+    """Refresh available Lora networks"""
+    return networks.list_available_networks()
 
 def unload():
     networks.originals.undo()
@@ -60,13 +80,7 @@ def create_lora_json(obj: network.NetworkOnDisk):
 
 
 def api_networks(_: gr.Blocks, app: FastAPI):
-    @app.get("/sdapi/v1/loras")
-    async def get_loras():
-        return [create_lora_json(obj) for obj in networks.available_networks.values()]
-
-    @app.post("/sdapi/v1/refresh-loras")
-    async def refresh_loras():
-        return networks.list_available_networks()
+    app.include_router(lora_router, prefix="/sdapi/v1", tags=["Lora"])
 
 
 script_callbacks.on_app_started(api_networks)
