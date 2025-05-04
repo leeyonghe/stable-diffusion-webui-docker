@@ -1,17 +1,13 @@
-ARG PYTHON_VERSION=3.10
-ARG CUDA_VERSION=11.8.0
-ARG CUDNN_VERSION=8
-ARG BUILD_TYPE=prod
+# Base image with CUDA support
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 
-FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-runtime-ubuntu22.04 AS base
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP
 
-# 환경 변수 설정
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONUNBUFFERED=1
-
-# 시스템 의존성 설치
-RUN apt-get update && \
-    apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
     wget \
     python3 \
@@ -20,71 +16,80 @@ RUN apt-get update && \
     libgl1 \
     libglib2.0-0 \
     curl \
+    build-essential \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Rust 설치
+# Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo
 
-# pip 및 setuptools 업그레이드
-RUN pip${PYTHON_VERSION} install --upgrade pip setuptools wheel
+# Set up Python environment
+RUN python3 -m pip install --upgrade pip setuptools wheel
 
-# pip 설정 (재시도 및 타임아웃 설정)
-RUN pip${PYTHON_VERSION} config set global.timeout 600 && \
-    pip${PYTHON_VERSION} config set global.retries 10 && \
-    pip${PYTHON_VERSION} config set global.trusted-host "download.pytorch.org"
-
-# 작업 디렉토리 설정
+# Create and set working directory
 WORKDIR /app
 
-# 저장소 클론
+# Clone the main repository
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
 
+# Set working directory
 WORKDIR /app/stable-diffusion-webui
 
-# Stable Diffusion 저장소 클론
-RUN mkdir -p repositories && \
-    cd repositories && \
-    git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai && \
+# Create repositories directory
+RUN mkdir -p repositories
+
+# Clone required repositories
+WORKDIR /app/stable-diffusion-webui/repositories
+RUN git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai && \
     git clone https://github.com/Stability-AI/generative-models.git sgm && \
     git clone https://github.com/salesforce/BLIP.git
 
-# Install required dependencies
-RUN pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 einops k-diffusion safetensors && \
-    pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 transformers && \
-    cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
-    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
+# Install PyTorch with CUDA support
+WORKDIR /app/stable-diffusion-webui
+RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# BLIP 모듈을 Python 경로에 추가
-ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:$PYTHONPATH
+# Install core dependencies
+RUN pip3 install --no-cache-dir \
+    einops \
+    k-diffusion \
+    safetensors \
+    transformers==4.30.2 \
+    setuptools-rust \
+    tokenizers==0.13.3
 
-# 필요한 디렉토리 생성
+# Install SGM
+WORKDIR /app/stable-diffusion-webui/repositories/sgm
+RUN pip3 install -e .
+
+# Install BLIP dependencies
+WORKDIR /app/stable-diffusion-webui/repositories/BLIP
+RUN pip3 install --no-cache-dir \
+    timm==0.4.12 \
+    transformers==4.15.0 \
+    fairscale==0.4.4 \
+    pycocoevalcap
+
+# Set working directory back to main
+WORKDIR /app/stable-diffusion-webui
+
+# Create necessary directories
 RUN mkdir -p models/Stable-diffusion && \
     mkdir -p models/VAE && \
     mkdir -p embeddings && \
     mkdir -p outputs && \
     mkdir -p extensions
 
-# 기본 모델 다운로드 (원하는 모델로 변경 가능)
+# Download default model
 RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors -O models/Stable-diffusion/v1-5-pruned.safetensors
 
-# Python 의존성 설치
-RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt && \
-    pip${PYTHON_VERSION} install --no-cache-dir ftfy regex tqdm && \
-    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git && \
-    pip${PYTHON_VERSION} install --no-cache-dir fastapi uvicorn python-multipart
+# Install remaining requirements
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# 포트 노출
+# Expose port
 EXPOSE 7860
 
-# 웹 UI 시작
+# Start command
 CMD ["python3", "webui.py", "--listen", "--port", "7860"]
-
-# 개발 환경 스테이지
-FROM base AS dev
-
-RUN apt-get update && apt-get install -y \
-    vim \
-    curl \
-    && rm -rf /var/lib/apt/lists/* 
