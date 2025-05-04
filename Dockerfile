@@ -4,7 +4,7 @@ FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP
+    PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:/app/taming-transformers
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -58,7 +58,19 @@ RUN pip3 install --no-cache-dir \
     safetensors \
     transformers==4.30.2 \
     setuptools-rust \
-    tokenizers==0.13.3
+    tokenizers==0.13.3 \
+    ftfy \
+    regex \
+    tqdm \
+    open_clip_torch \
+    git+https://github.com/openai/CLIP.git \
+    pytorch_lightning==1.9.4 \
+    xformers==0.0.23
+
+# Install taming-transformers with its dependencies
+RUN git clone https://github.com/CompVis/taming-transformers.git /app/taming-transformers && \
+    cd /app/taming-transformers && \
+    pip3 install -e .
 
 # Install SGM
 WORKDIR /app/stable-diffusion-webui/repositories/sgm
@@ -66,11 +78,11 @@ RUN pip3 install -e .
 
 # Install BLIP dependencies
 WORKDIR /app/stable-diffusion-webui/repositories/BLIP
-RUN pip3 install --no-cache-dir \
-    timm==0.4.12 \
-    transformers==4.15.0 \
-    fairscale==0.4.4 \
-    pycocoevalcap
+# RUN pip3 install --no-cache-dir \
+#     timm==0.4.12 \
+#     transformers==4.15.0 \
+#     fairscale==0.4.4 \
+#     pycocoevalcap
 
 # Set working directory back to main
 WORKDIR /app/stable-diffusion-webui
