@@ -28,9 +28,10 @@ diffusionmodules_model_AttnBlock_forward = ldm.modules.diffusionmodules.model.At
 # have memory efficient cross attention anyway, so this disables SD2.0's memory efficient cross attention
 ldm.modules.attention.MemoryEfficientCrossAttention = ldm.modules.attention.CrossAttention
 
-# Initialize attention modes for SelfAttention
-if not hasattr(ldm.modules.attention.SelfAttention, 'ATTENTION_MODES'):
-    ldm.modules.attention.SelfAttention.ATTENTION_MODES = ("xformers", "torch", "torch-hb", "math", "debug")
+# Configure attention modes for BasicTransformerBlock
+if not hasattr(ldm.modules.attention.BasicTransformerBlock, 'ATTENTION_MODES'):
+    ldm.modules.attention.BasicTransformerBlock.ATTENTION_MODES = {}
+ldm.modules.attention.BasicTransformerBlock.ATTENTION_MODES["softmax-xformers"] = ldm.modules.attention.CrossAttention
 
 # silence new console spam from SD2
 ldm.modules.attention.print = shared.ldm_print
