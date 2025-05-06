@@ -4,7 +4,7 @@ FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:/app/taming-transformers
+    PYTHONPATH=/app/stable-diffusion-webui:/app/stable-diffusion-webui/repositories/BLIP:/app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai:/app/stable-diffusion-webui/repositories/taming-transformers:/app/stable-diffusion-webui/repositories/sgm:/app/stable-diffusion-webui/repositories/stablediffusion
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -29,32 +29,18 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 # Set up Python environment
 RUN python3 -m pip install --upgrade pip setuptools wheel
 
-# Create and set working directory
-WORKDIR /app
-
-# Clone the main repository
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
-
 # Set working directory
 WORKDIR /app/stable-diffusion-webui
 
 # Create repositories directory
 RUN mkdir -p repositories
 
-# Clone required repositories
-WORKDIR /app/stable-diffusion-webui/repositories
-RUN git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai && \
-    git clone https://github.com/Stability-AI/generative-models.git sgm && \
-    git clone https://github.com/salesforce/BLIP.git
-
-# Install PyTorch with CUDA support
-WORKDIR /app/stable-diffusion-webui
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# Copy the application files
+COPY . .
 
 # Install core dependencies
 RUN pip3 install --no-cache-dir \
     einops \
-    k-diffusion \
     safetensors \
     transformers==4.30.2 \
     setuptools-rust \
@@ -65,37 +51,41 @@ RUN pip3 install --no-cache-dir \
     open_clip_torch \
     git+https://github.com/openai/CLIP.git \
     pytorch_lightning==1.9.4 \
-    xformers==0.0.23
+    timm==0.4.12 \
+    fairscale==0.4.4 \
+    pycocoevalcap
 
-# Install taming-transformers with its dependencies
-RUN git clone https://github.com/CompVis/taming-transformers.git /app/taming-transformers && \
-    cd /app/taming-transformers && \
-    pip3 install -e .
+# Install PyTorch with CUDA support first
+RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+
+# Install xformers with CUDA support
+RUN pip3 install --no-cache-dir xformers==0.0.22.post7 --index-url https://download.pytorch.org/whl/cu118
+
+# Install stable-diffusion
+WORKDIR /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai
+RUN pip3 install -e .
+
+# Install k-diffusion
+WORKDIR /app/stable-diffusion-webui/repositories/k-diffusion
+RUN pip3 install -e .
+
+# Install taming-transformers
+WORKDIR /app/stable-diffusion-webui/repositories/taming-transformers
+RUN pip3 install -e .
 
 # Install SGM
-WORKDIR /app/stable-diffusion-webui/repositories/sgm
+WORKDIR /app/stable-diffusion-webui/repositories/generative-models/sgm
+RUN pip3 install -e .
+
+# Install stablediffusion
+WORKDIR /app/stable-diffusion-webui/repositories/stablediffusion
 RUN pip3 install -e .
 
 # Install BLIP dependencies
 WORKDIR /app/stable-diffusion-webui/repositories/BLIP
-# RUN pip3 install --no-cache-dir \
-#     timm==0.4.12 \
-#     transformers==4.15.0 \
-#     fairscale==0.4.4 \
-#     pycocoevalcap
 
 # Set working directory back to main
 WORKDIR /app/stable-diffusion-webui
-
-# Create necessary directories
-RUN mkdir -p models/Stable-diffusion && \
-    mkdir -p models/VAE && \
-    mkdir -p embeddings && \
-    mkdir -p outputs && \
-    mkdir -p extensions
-
-# Download default model
-RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors -O models/Stable-diffusion/v1-5-pruned.safetensors
 
 # Install remaining requirements
 RUN pip3 install --no-cache-dir -r requirements.txt
