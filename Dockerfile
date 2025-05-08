@@ -42,8 +42,9 @@ USER sduser
 # Install PyTorch first
 RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Install Python dependencies with specific versions
+RUN pip3 install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir "pydantic<2.0.0" "gradio==3.50.2" "huggingface-hub>=0.19.4"
 
 # Clean up any existing repositories directory
 RUN rm -rf /app/stable-diffusion-webui/repositories/*
@@ -72,8 +73,9 @@ RUN git clone https://github.com/Stability-AI/generative-models.git /app/stable-
     cd /app/stable-diffusion-webui/repositories/generative-models && \
     pip3 install --no-cache-dir -e .
 
-# Clone stablediffusion repository
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /app/stable-diffusion-webui/repositories/stablediffusion
+# Clone stablediffusion repository and assets
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /app/stable-diffusion-webui/repositories/stablediffusion && \
+    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets.git /app/stable-diffusion-webui/repositories/stable-diffusion-webui-assets
 
 # Return to main directory
 WORKDIR /app/stable-diffusion-webui
