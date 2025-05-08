@@ -1,15 +1,7 @@
-ARG PYTHON_VERSION=3.10
-ARG CUDA_VERSION=11.8.0
-ARG CUDNN_VERSION=8
-ARG BUILD_TYPE=prod
+# Base image with CUDA support
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
 
-FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_VERSION}-runtime-ubuntu22.04 AS base
-
-# 환경 변수 설정
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONUNBUFFERED=1
-
-# 시스템 의존성 설치
+# Install system dependencies
 RUN apt-get update && \
     apt-get install -y \
     git \
@@ -17,74 +9,84 @@ RUN apt-get update && \
     python3 \
     python3-venv \
     python3-pip \
-    libgl1 \
+    libgl1-mesa-glx \
     libglib2.0-0 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Rust 설치
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Create a non-root user
+RUN useradd -m -s /bin/bash sduser && \
+    mkdir -p /app && \
+    chown -R sduser:sduser /app
 
-# pip 및 setuptools 업그레이드
-RUN pip${PYTHON_VERSION} install --upgrade pip setuptools wheel
-
-# pip 설정 (재시도 및 타임아웃 설정)
-RUN pip${PYTHON_VERSION} config set global.timeout 600 && \
-    pip${PYTHON_VERSION} config set global.retries 10 && \
-    pip${PYTHON_VERSION} config set global.trusted-host "download.pytorch.org"
-
-# 작업 디렉토리 설정
-WORKDIR /app
-
-# 저장소 클론
-RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+COPY . /app/stable-diffusion-webui
+RUN chown -R sduser:sduser /app/stable-diffusion-webui
 
 WORKDIR /app/stable-diffusion-webui
 
-# Stable Diffusion 저장소 클론
-RUN mkdir -p repositories && \
-    cd repositories && \
-    git clone https://github.com/CompVis/stable-diffusion.git stable-diffusion-stability-ai && \
-    git clone https://github.com/Stability-AI/generative-models.git sgm && \
-    git clone https://github.com/salesforce/BLIP.git
+# Make webui.sh executable
+RUN chmod +x webui.sh
 
-# Install required dependencies
-RUN pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 einops k-diffusion safetensors && \
-    pip${PYTHON_VERSION} install --no-cache-dir --timeout 600 --retries 10 transformers && \
-    cd repositories/sgm && pip${PYTHON_VERSION} install -e . && \
-    cd ../BLIP && pip${PYTHON_VERSION} install -r requirements.txt
+# Set up Python environment
+ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai:/home/sduser/.local/lib/python3.10/site-packages
+ENV PATH=/home/sduser/.local/bin:$PATH
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV GRADIO_SERVER_NAME=0.0.0.0
+ENV GRADIO_SERVER_PORT=7860
+ENV HF_HUB_DISABLE_RESUME_DOWNLOAD=1
+ENV HF_HUB_DISABLE_PROGRESS_BARS=1
+ENV GRADIO_SERVER_SHARE=true
 
-# BLIP 모듈을 Python 경로에 추가
-ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/BLIP:$PYTHONPATH
+# Create and set permissions for Python package directories
+RUN mkdir -p /home/sduser/.local/lib/python3.10/site-packages && \
+    chown -R sduser:sduser /home/sduser/.local
 
-# 필요한 디렉토리 생성
-RUN mkdir -p models/Stable-diffusion && \
-    mkdir -p models/VAE && \
-    mkdir -p embeddings && \
-    mkdir -p outputs && \
-    mkdir -p extensions
+# Switch to non-root user
+USER sduser
 
-# 기본 모델 다운로드 (원하는 모델로 변경 가능)
-RUN wget -q https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors -O models/Stable-diffusion/v1-5-pruned.safetensors
+# Install PyTorch first
+RUN pip3 install --no-cache-dir torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
 
-# Python 의존성 설치
-RUN pip${PYTHON_VERSION} install --no-cache-dir -r requirements.txt && \
-    pip${PYTHON_VERSION} install --no-cache-dir ftfy regex tqdm && \
-    pip${PYTHON_VERSION} install --no-cache-dir git+https://github.com/openai/CLIP.git && \
-    pip${PYTHON_VERSION} install --no-cache-dir fastapi uvicorn python-multipart
+# Install Python dependencies with specific versions
+RUN pip3 install --no-cache-dir -r requirements.txt && \
+    pip3 install --no-cache-dir "pydantic<2.0.0" "gradio==3.41.2" "huggingface-hub>=0.19.4" "xformers"
 
-# 포트 노출
-EXPOSE 7860
+# Clean up any existing repositories directory
+RUN rm -rf /app/stable-diffusion-webui/repositories/*
 
-# 웹 UI 시작
-CMD ["python3", "webui.py", "--listen", "--port", "7860"]
+# Clone and install stable-diffusion-stability-ai
+RUN git clone https://github.com/Stability-AI/stablediffusion.git /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai && \
+    cd /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai && \
+    pip3 install --no-cache-dir .
 
-# 개발 환경 스테이지
-FROM base AS dev
+# Install midas and other required dependencies
+RUN pip3 install --no-cache-dir timm opencv-python-headless
 
-RUN apt-get update && apt-get install -y \
-    vim \
-    curl \
-    && rm -rf /var/lib/apt/lists/* 
+# Clone and copy taming modules
+RUN git clone https://github.com/CompVis/taming-transformers.git /app/stable-diffusion-webui/repositories/taming-transformers && \
+    mkdir -p /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai/taming && \
+    cp -r /app/stable-diffusion-webui/repositories/taming-transformers/taming/* /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai/taming/
+
+# Install k-diffusion
+RUN git clone https://github.com/crowsonkb/k-diffusion.git /app/stable-diffusion-webui/repositories/k-diffusion && \
+    cd /app/stable-diffusion-webui/repositories/k-diffusion && \
+    pip3 install --no-cache-dir .
+
+# Install SGM and its dependencies
+RUN git clone https://github.com/Stability-AI/generative-models.git /app/stable-diffusion-webui/repositories/generative-models && \
+    pip3 install --no-cache-dir omegaconf pytorch-lightning einops && \
+    cd /app/stable-diffusion-webui/repositories/generative-models && \
+    pip3 install --no-cache-dir -e .
+
+# Clone stablediffusion repository and assets
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /app/stable-diffusion-webui/repositories/stablediffusion && \
+    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets.git /app/stable-diffusion-webui/repositories/stable-diffusion-webui-assets
+
+# Clone BLIP repository
+RUN git clone https://github.com/salesforce/BLIP.git /app/stable-diffusion-webui/repositories/BLIP
+
+# Return to main directory
+WORKDIR /app/stable-diffusion-webui
+
+# Start command
+CMD ["python3", "./webui.py", "--no-half", "--no-half-vae", "--disable-nan-check"]

@@ -20,7 +20,7 @@ open-clip-torch
 piexif
 protobuf==3.20.0
 psutil
-pytorch_lightning
+pytorch_lightning==1.9.4
 requests
 resize-right
 
@@ -32,3 +32,19 @@ torchdiffeq
 torchsde
 transformers==4.30.2
 pillow-avif-plugin==1.4.3
+
+setuptools-rust
+tokenizers==0.13.3
+ftfy
+regex
+tqdm
+timm==0.4.12
+fairscale==0.4.4
+pycocoevalcap
+git+https://github.com/openai/CLIP.git
+
+
+torch==2.1.0 
+torchvision==0.16.0 
+torchaudio==2.1.0
+xformers==0.0.22.post7
