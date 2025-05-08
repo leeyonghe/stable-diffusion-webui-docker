@@ -9,6 +9,8 @@ RUN apt-get update && \
     python3 \
     python3-venv \
     python3-pip \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
@@ -43,27 +45,35 @@ RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy taming modules to stable-diffusion-stability-ai
-RUN mkdir -p /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai/taming && \
+# Clean up any existing repositories directory
+RUN rm -rf /app/stable-diffusion-webui/repositories/*
+
+# Clone and install stable-diffusion-stability-ai
+RUN git clone https://github.com/Stability-AI/stablediffusion.git /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai && \
+    cd /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai && \
+    pip3 install --no-cache-dir .
+
+# Install midas and other required dependencies
+RUN pip3 install --no-cache-dir timm opencv-python-headless
+
+# Clone and copy taming modules
+RUN git clone https://github.com/CompVis/taming-transformers.git /app/stable-diffusion-webui/repositories/taming-transformers && \
+    mkdir -p /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai/taming && \
     cp -r /app/stable-diffusion-webui/repositories/taming-transformers/taming/* /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai/taming/
 
-# Install stable-diffusion
-WORKDIR /app/stable-diffusion-webui/repositories/stable-diffusion-stability-ai
-RUN pip3 install --no-cache-dir .
-
 # Install k-diffusion
-WORKDIR /app/stable-diffusion-webui/repositories/k-diffusion
-RUN pip3 install --no-cache-dir .
+RUN git clone https://github.com/crowsonkb/k-diffusion.git /app/stable-diffusion-webui/repositories/k-diffusion && \
+    cd /app/stable-diffusion-webui/repositories/k-diffusion && \
+    pip3 install --no-cache-dir .
 
 # Install SGM and its dependencies
-WORKDIR /app/stable-diffusion-webui/repositories/generative-models/sgm
-RUN pip3 install --no-cache-dir hatchling && \
-    pip3 install --no-cache-dir . && \
-    pip3 install --no-cache-dir omegaconf pytorch-lightning einops
+RUN git clone https://github.com/Stability-AI/generative-models.git /app/stable-diffusion-webui/repositories/generative-models && \
+    pip3 install --no-cache-dir omegaconf pytorch-lightning einops && \
+    cd /app/stable-diffusion-webui/repositories/generative-models && \
+    pip3 install --no-cache-dir -e .
 
-# Install stablediffusion
-WORKDIR /app/stable-diffusion-webui/repositories/stablediffusion
-RUN pip3 install --no-cache-dir .
+# Clone stablediffusion repository
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /app/stable-diffusion-webui/repositories/stablediffusion
 
 # Return to main directory
 WORKDIR /app/stable-diffusion-webui
