@@ -31,6 +31,11 @@ ENV PYTHONPATH=/app/stable-diffusion-webui/repositories/stable-diffusion-stabili
 ENV PATH=/home/sduser/.local/bin:$PATH
 ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV GRADIO_SERVER_NAME=0.0.0.0
+ENV GRADIO_SERVER_PORT=7860
+ENV HF_HUB_DISABLE_RESUME_DOWNLOAD=1
+ENV HF_HUB_DISABLE_PROGRESS_BARS=1
+ENV GRADIO_SERVER_SHARE=true
 
 # Create and set permissions for Python package directories
 RUN mkdir -p /home/sduser/.local/lib/python3.10/site-packages && \
@@ -40,11 +45,11 @@ RUN mkdir -p /home/sduser/.local/lib/python3.10/site-packages && \
 USER sduser
 
 # Install PyTorch first
-RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
+RUN pip3 install --no-cache-dir torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
 
 # Install Python dependencies with specific versions
 RUN pip3 install --no-cache-dir -r requirements.txt && \
-    pip3 install --no-cache-dir "pydantic<2.0.0" "gradio==3.50.2" "huggingface-hub>=0.19.4"
+    pip3 install --no-cache-dir "pydantic<2.0.0" "gradio==3.41.2" "huggingface-hub>=0.19.4" "xformers"
 
 # Clean up any existing repositories directory
 RUN rm -rf /app/stable-diffusion-webui/repositories/*
@@ -77,8 +82,11 @@ RUN git clone https://github.com/Stability-AI/generative-models.git /app/stable-
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /app/stable-diffusion-webui/repositories/stablediffusion && \
     git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets.git /app/stable-diffusion-webui/repositories/stable-diffusion-webui-assets
 
+# Clone BLIP repository
+RUN git clone https://github.com/salesforce/BLIP.git /app/stable-diffusion-webui/repositories/BLIP
+
 # Return to main directory
 WORKDIR /app/stable-diffusion-webui
 
 # Start command
-CMD ["python3", "./webui.py"]
+CMD ["python3", "./webui.py", "--no-half", "--no-half-vae", "--disable-nan-check"]
